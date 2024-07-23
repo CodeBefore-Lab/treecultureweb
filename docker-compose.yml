@@ -1,6 +1,6 @@
 version: "3.1"
 services:
-  gastro-webapp:
+  tree-culture:
     image: tree-culture:0.0.1
     build:
       dockerfile: Dockerfile
