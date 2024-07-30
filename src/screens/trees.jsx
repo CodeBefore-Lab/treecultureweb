@@ -12,6 +12,7 @@ const { Content } = Layout;
 
 const Trees = () => {
   const [trees, setTrees] = useState([]);
+  const navigate = useNavigate();
 
   const getTrees = async () => {
     const data = await sendRequest("GET", "Trees", null);
@@ -41,6 +42,7 @@ const Trees = () => {
                   <Meta
                     avatar={<Avatar icon={<FaTree />} />}
                     title={tree.treeName}
+                    onClick={() => navigate(`/updateTree/${tree.treeId}`)}
                     description={
                       //show only 10 characters of the description
                       tree.descs.length > 10 ? tree.descs.substring(0, 10) + "..." : tree.descs

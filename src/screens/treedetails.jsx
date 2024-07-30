@@ -10,7 +10,7 @@ const TreeDetails = () => {
 
   const getTree = async () => {
     const response = await fetch(
-      `https://api.pestomat.com/v1/treewebapi/trees/
+      `http://160.20.111.43:3006/api/trees/
     ${id}?id=${id}
     `,
       {

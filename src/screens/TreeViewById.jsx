@@ -24,8 +24,8 @@ const TreeDetailId = () => {
     <div className="bg-white p-4 rounded-md shadow-md m-4 flex justify-center items-center flex-col">
       {datas && datas.data.length > 0 ? (
         <>
-          <button onClick={() => navigate("/")} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Back
+          <button onClick={() => navigate("/")} className=" text-dark font-bold py-2 px-4 rounded border border-black my-2">
+            Geri Dön
           </button>
           <Card key={datas?.treeId} className="w-96" cover={<img alt="example" src="https://picsum.photos/id/10/300/300" />}>
             <Meta avatar={<Avatar icon={<FaTree />} />} title={datas?.data[0].treeName} description={datas?.data[0].descs} />

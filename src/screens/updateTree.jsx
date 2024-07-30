@@ -2,87 +2,81 @@ import { useContext, useEffect, useState } from "react";
 import Choices from "../components/choices";
 import ThemeContext from "../context";
 import { sendRequest } from "../utils/requests";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { Layout, theme } from "antd";
-import Navbar from "../components/navbar";
 
-const { Header, Sider, Content } = Layout;
+const { Content } = Layout;
 
-function Dashboard() {
+function UpdateTree() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const { id } = useParams();
   const datas = useContext(ThemeContext);
 
   const [treeName, setTreeName] = useState("");
   const [treeDescription, setTreeDescription] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  //make a request for localhost:5137
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [qrCode, setQrCode] = useState("");
+
   const token = localStorage.getItem("token");
 
-  //create new object for data and selecteddata and set them to the context data
+  // Fetch the tree data by id
+  const fetchTreeData = async () => {
+    datas.setLoading(true);
+    const response = await sendRequest("GET", `Trees/${id}`, null);
 
-  const setAndShowData = () => {
-    //set treename and treedescription and selected data to the context data
-    datas.setAllData({ treeName, treeDescription, lines: datas.selected });
+    const data = await response;
 
-    //add tree to the database
-    addTree();
+    if (data.success) {
+      const treeData = data.data[0];
+      setTreeName(treeData.treeName);
+      setTreeDescription(treeData.descs);
+      setLatitude(treeData.latitude);
+      setLongitude(treeData.longitude);
+      setPhotoUrl(treeData.photoUrl);
+      setQrCode(treeData.qrCode);
+      datas.setSelected(treeData.treeChoices);
+    }
+    datas.setLoading(false);
   };
 
+  // Update the tree data
+  const updateTreeData = async () => {
+    datas.setLoading(true);
+    const response = await sendRequest("PUT", `Trees/${id}`, {
+      treeName,
+      description: treeDescription,
+      latitude,
+      longitude,
+      qrCode,
+      photoUrl,
+      treeChoices: datas.selected,
+    });
+    datas.setLoading(false);
+    // Handle the response as needed
+  };
+
+  // Fetch choices data
   const fetchData = async () => {
     datas.setLoading(true);
     const data = await sendRequest("GET", "Choices", null);
-
     datas.setLoading(false);
-    console.log(datas.data);
     datas.setData(data);
   };
 
-  // {
-  //   "treeName": "string",
-  //  "latitude": "string",
-  //   "longitude": "string",
-  //   "description": "string",
-  //   "qrCode": "string",
-  //   "photoUrl": "string",
-  //   "lines": [
-  //     {
-  //       "choiceId": 0
-  //     }
-  //   ]
-  // }
-  //do a post request to the server
-
-  const addTree = async () => {
-    const response = await sendRequest("POST", "Trees", {
-      treeName: treeName,
-      description: treeDescription,
-      latitude: latitude,
-      longitude: longitude,
-      qrCode: "string",
-      photoUrl: "string",
-      treeChoices: datas.selected,
-    });
-
-    const data = await JSON.parse(await response.text());
-    console.log(data);
-
-    //clear inputs and selected items
-    datas.setSelected([]);
-    setTreeName("");
-    setTreeDescription("");
-  };
-
   useEffect(() => {
+    fetchTreeData();
     fetchData();
   }, []);
 
   if (token === null) {
     return <Navigate to="/login" />;
   }
+
   return (
     <Layout>
       <Content
@@ -96,7 +90,7 @@ function Dashboard() {
       >
         <div className="flex flex-col space-y-4 w-full gap-5">
           <div className="flex justify-between items-center p-4">
-            <div className="text-2xl font-bold text-slate-800">Ağaç Ekleme</div>
+            <div className="text-2xl font-bold text-slate-800">Ağaç Güncelle</div>
           </div>
 
           <div className="flex flex-col justify-between gap-5">
@@ -144,8 +138,8 @@ function Dashboard() {
               ))}
           </div>
           <div className="flex items-center gap-5 w-full justify-end">
-            <button className="bg-green-500 text-white p-3 w-full rounded-xl" onClick={setAndShowData}>
-              Kaydet
+            <button className="bg-green-500 text-white p-3 w-full rounded-xl" onClick={updateTreeData}>
+              Güncelle
             </button>
           </div>
         </div>
@@ -154,4 +148,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default UpdateTree;

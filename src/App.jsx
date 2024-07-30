@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Dashboard from "./screens/dashboard";
 import ThemeContext from "./context";
 import TreeDetails from "./screens/treedetails";
+import UpdateTree from "./screens/updateTree";
 import Login from "./screens/login";
 import { BrowserRouter, Outlet, Route, Router, Routes, useNavigate } from "react-router-dom";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -76,6 +77,17 @@ function App() {
                 <Navbar />
 
                 <Secret />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route path="/updateTree/:id" element={<UpdateTree />} /> */}
+
+          <Route
+            path="/updateTree/:id"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <UpdateTree />
               </ProtectedRoute>
             }
           />

@@ -157,6 +157,7 @@ const Maps = () => {
                       <span>{item.treeName}</span>
                       <span>{item.descs}</span>
                       <img src="https://picsum.photos/id/10/128/128" className="w-32" alt="" />
+                      <Button onClick={() => navigate(`/Trees/${item.treeId}`)}>Detay</Button>
                     </div>
                   </Popup>
                 </Marker>
