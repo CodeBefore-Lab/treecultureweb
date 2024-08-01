@@ -3,7 +3,8 @@
 import axios from "axios";
 
 // const BASE_URL = "https://api.pestomat.com/v1/treewebapi/"; // Update this with your backend URL
-const BASE_URL = "http://160.20.111.43:3006/api/";
+// const BASE_URL = "http://160.20.111.43:3006/api/";
+const BASE_URL = "https://peyzajbitkileriapi.uludag.edu.tr/api/";
 
 async function sendRequest(method, url, data = null, options = {}, token = null) {
   // Get the token from local storage without ""

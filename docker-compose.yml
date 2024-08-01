@@ -1,7 +1,7 @@
 version: "3.1"
 services:
   tree-culture:
-    image: tree-culture:0.0.4
+    image: tree-culture:0.0.5
     build:
       dockerfile: Dockerfile
     ports:
