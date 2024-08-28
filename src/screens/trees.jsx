@@ -38,7 +38,7 @@ const Trees = () => {
           {trees.data &&
             trees.data.map((tree) => {
               return (
-                <Card key={tree.treeId} style={{ width: 300 }} cover={<img alt="example" src="https://picsum.photos/id/10/300/300" />}>
+                <Card key={tree.treeId} style={{ width: 300 }} cover={<img alt="example" src={tree.photoUrl} />}>
                   <Meta
                     avatar={<Avatar icon={<FaTree />} />}
                     title={tree.treeName}

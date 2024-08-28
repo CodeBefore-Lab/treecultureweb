@@ -155,8 +155,8 @@ const Maps = () => {
                   <Popup className="w-64">
                     <div className="flex flex-col p-1 gap-2 justify-center items-center">
                       <span>{item.treeName}</span>
-                      <span>{item.descs}</span>
-                      <img src="https://picsum.photos/id/10/128/128" className="w-32" alt="" />
+                      <span>{item.descs.length > 100 ? item.descs.substring(0, 100) + "..." : item.descs}</span>
+                      <img src={item.photoUrl} className="w-32" alt="" />
                       <Button onClick={() => navigate(`/Trees/${item.treeId}`)}>Detay</Button>
                     </div>
                   </Popup>
@@ -173,17 +173,19 @@ const Maps = () => {
                       key={tree.treeId}
                       onClick={() => navigate(`/Trees/${tree.treeId}`)}
                       style={{ width: 300 }}
-                      cover={<img alt="example" src="https://picsum.photos/id/10/300/300" />}
+                      cover={<img alt="example" src={tree.photoUrl} />}
                     >
-                      <Meta avatar={<Avatar icon={<FaTree />} />} title={tree.treeName} description={tree.descs} />
-                      <div className="flex justify-between">
-                        {tree.treeChoices.map((choice) => {
-                          return (
-                            <div className="flex">
-                              <p>{choice.choiceId}</p>
-                            </div>
-                          );
-                        })}
+                      <Meta
+                        avatar={<Avatar icon={<FaTree />} />}
+                        title={tree.treeName}
+                        description={tree.descs.length > 100 ? tree.descs.substring(0, 100) + "..." : tree.descs}
+                      />
+                      <div className="flex flex-wrap gap-2 mt-5">
+                        {tree.treeChoices.map((choice) => (
+                          <div key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                            {choice.choiceName}
+                          </div>
+                        ))}
                       </div>
                     </Card>
                   );
