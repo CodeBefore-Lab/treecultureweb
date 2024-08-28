@@ -12,6 +12,7 @@ import { Secret } from "./screens/secret";
 import Navbar from "./components/navbar";
 import Trees from "./screens/trees";
 import Maps from "./screens/maps";
+import Contact from "./screens/contact";
 import TreeDetailId from "./screens/TreeViewById";
 import { Button } from "antd";
 
@@ -106,6 +107,7 @@ function App() {
         <Route element={<GuestLayout />}>
           <Route path="/" element={<Maps />} />
           <Route path="/trees/:id" element={<TreeDetailId />} />
+          <Route path="/contact" element={<Contact />} />
         </Route>
       </Routes>
     </ThemeContext.Provider>
