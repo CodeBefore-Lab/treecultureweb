@@ -27,19 +27,26 @@ const TreeDetailId = () => {
           <button onClick={() => navigate("/")} className=" text-dark font-bold py-2 px-4 rounded border border-black my-2">
             Geri Dön
           </button>
-          <Card key={datas?.treeId} className="w-96" cover={<img alt="example" src={datas?.data[0].photoUrl} />}>
+          <Card
+            key={datas?.treeId}
+            className="flex flex-col justify-center items-center"
+            cover={<img alt="example" className="w-96 h-96 object-cover" src={datas?.data[0].photoUrl} />}
+          >
             <Meta
+              className="flex flex-col gap-2"
               avatar={<Avatar icon={<FaTree />} />}
               title={datas?.data[0].treeName}
               description={
                 <>
-                  <span>{datas?.data[0].descs}</span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {datas?.data[0].treeChoices?.map((choice) => (
-                      <div key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                        {choice.choiceName}
-                      </div>
-                    ))}
+                  <div className="flex flex-col gap-2">
+                    <div className="text-sm" dangerouslySetInnerHTML={{ __html: datas?.data[0].descs }} />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {datas?.data[0].treeChoices?.map((choice) => (
+                        <div key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                          {choice.choiceName}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </>
               }

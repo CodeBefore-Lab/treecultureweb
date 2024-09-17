@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef, useMemo } from "react";
+import JoditEditor from "jodit-react";
 import Choices from "../components/choices";
 import ThemeContext from "../context";
 import { sendRequest } from "../utils/requests";
@@ -21,6 +22,17 @@ function UpdateTree() {
   const [longitude, setLongitude] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [qrCode, setQrCode] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+
+  const editor = useRef(null);
+  const config = useMemo(
+    () => ({
+      readonly: false,
+      placeholder: "Ağaç Açıklama...",
+      height: 300,
+    }),
+    []
+  );
 
   const token = localStorage.getItem("token");
 
@@ -40,6 +52,11 @@ function UpdateTree() {
       setPhotoUrl(treeData.photoUrl);
       setQrCode(treeData.qrCode);
       datas.setSelected(treeData.treeChoices);
+
+      // Generate QR code URL put full url https://peyzajbitkileri.uludag.edu.tr/tree/id
+      const qrData = `https://peyzajbitkileri.uludag.edu.tr/tree/${id}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+      setQrCodeUrl(qrUrl);
     }
     datas.setLoading(false);
   };
@@ -101,14 +118,7 @@ function UpdateTree() {
               onChange={(e) => setTreeName(e.target.value)}
               value={treeName}
             />
-            <textarea
-              type="text"
-              placeholder="Ağaç Açıklama"
-              className="p-3 w-full rounded-xl border-2 border-gray-200 shadow-lg"
-              rows={5}
-              onChange={(e) => setTreeDescription(e.target.value)}
-              value={treeDescription}
-            ></textarea>
+            <JoditEditor ref={editor} value={treeDescription} config={config} tabIndex={1} onBlur={(newContent) => setTreeDescription(newContent)} />
             <input
               type="text"
               placeholder="Enlem"
@@ -123,6 +133,11 @@ function UpdateTree() {
               onChange={(e) => setLongitude(e.target.value)}
               value={longitude}
             />
+          </div>
+          {/* Add QR Code display */}
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-lg font-semibold">Ağaç QR Kodu</p>
+            {qrCodeUrl && <img src={qrCodeUrl} alt="Tree QR Code" className="border-2 border-gray-200 rounded-xl" />}
           </div>
           <div className="py-1">
             {datas.data &&

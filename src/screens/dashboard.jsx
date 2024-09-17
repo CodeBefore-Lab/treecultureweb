@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import Choices from "../components/choices";
 import ThemeContext from "../context";
 import { sendRequest } from "../utils/requests";
 import { Navigate } from "react-router-dom";
 import { Layout, theme } from "antd";
 import Navbar from "../components/navbar";
+import JoditEditor from "jodit-react";
 
 const { Header, Sider, Content } = Layout;
 
@@ -83,6 +84,16 @@ function Dashboard() {
   if (token === null) {
     return <Navigate to="/login" />;
   }
+  const editor = useRef(null);
+  const config = useMemo(
+    () => ({
+      readonly: false,
+      placeholder: "Ağaç Açıklama...",
+      height: 300,
+    }),
+    []
+  );
+
   return (
     <Layout>
       <Content
@@ -107,14 +118,14 @@ function Dashboard() {
               onChange={(e) => setTreeName(e.target.value)}
               value={treeName}
             />
-            <textarea
-              type="text"
-              placeholder="Ağaç Açıklama"
-              className="p-3 w-full rounded-xl border-2 border-gray-200 shadow-lg"
-              rows={5}
-              onChange={(e) => setTreeDescription(e.target.value)}
+            <JoditEditor
+              ref={editor}
               value={treeDescription}
-            ></textarea>
+              config={config}
+              tabIndex={1}
+              onBlur={(newContent) => setTreeDescription(newContent)}
+              onChange={(newContent) => {}}
+            />
             <input
               type="text"
               placeholder="Enlem"
