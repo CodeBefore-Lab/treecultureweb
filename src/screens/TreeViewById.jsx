@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { sendRequest } from "../utils/requests";
 import { Avatar, Button, Card } from "antd";
 import Meta from "antd/es/card/Meta";
 import { FaTree } from "react-icons/fa";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const TreeDetailId = () => {
   const [datas, setDatas] = useState();
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState([]);
+  const [location, setLocation] = useState(null);
+  const mapRef = useRef(null);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,11 +25,21 @@ const TreeDetailId = () => {
       setMainImage(urls[0]);
       setAdditionalImages(urls.slice(1));
     }
+    // Konum bilgisini ayarla
+    if (data?.data[0]?.latitude && data?.data[0]?.longitude) {
+      setLocation([parseFloat(data.data[0].latitude), parseFloat(data.data[0].longitude)]);
+    }
   };
 
   useEffect(() => {
     getTree();
   }, []);
+
+  useEffect(() => {
+    if (location && mapRef.current) {
+      mapRef.current.setView(location, 16);
+    }
+  }, [location]);
 
   const handleImageClick = (newMainImage) => {
     setAdditionalImages((prevImages) => [mainImage, ...prevImages.filter((img) => img !== newMainImage)]);
@@ -57,23 +71,36 @@ const TreeDetailId = () => {
                 ))}
               </div>
             )}
+
+            {location && (
+              <div className="mt-4 w-full h-48">
+                <MapContainer center={location} zoom={18} style={{ height: "100%", width: "100%" }} ref={mapRef}>
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={location}>
+                    <Popup>{datas?.data[0].treeName}</Popup>
+                  </Marker>
+                </MapContainer>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 mt-4">
+              {datas?.data[0].treeChoices?.map((choice) => (
+                <div key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                  {choice.choiceName}
+                </div>
+              ))}
+            </div>
+
             <Meta
               className="flex flex-col gap-2 mt-4"
-              avatar={<Avatar icon={<FaTree />} />}
-              title={datas?.data[0].treeName}
+              title={<h1 className="text-2xl font-bold my-5">{datas?.data[0].treeName}</h1>}
               description={
-                <>
-                  <div className="flex flex-col gap-2">
-                    <div className="text-sm" dangerouslySetInnerHTML={{ __html: datas?.data[0].descs }} />
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {datas?.data[0].treeChoices?.map((choice) => (
-                        <div key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                          {choice.choiceName}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
+                <div className="flex flex-col gap-2">
+                  <div className="text-sm" dangerouslySetInnerHTML={{ __html: datas?.data[0].descs }} />
+                </div>
               }
             />
           </Card>
