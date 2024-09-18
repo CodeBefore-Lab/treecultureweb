@@ -2,8 +2,8 @@ import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import Choices from "../components/choices";
 import ThemeContext from "../context";
 import { sendRequest } from "../utils/requests";
-import { Navigate } from "react-router-dom";
-import { Layout, theme } from "antd";
+import { Navigate, useNavigate } from "react-router-dom";
+import { Layout, notification, theme } from "antd";
 import Navbar from "../components/navbar";
 import JoditEditor from "jodit-react";
 
@@ -15,12 +15,14 @@ function Dashboard() {
   } = theme.useToken();
 
   const datas = useContext(ThemeContext);
+  const navigate = useNavigate();
 
   const [treeName, setTreeName] = useState("");
   const [treeDescription, setTreeDescription] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [photoUrls, setPhotoUrls] = useState("");
+  const [showWarning, setShowWarning] = useState(false);
 
   //make a request for localhost:5137
   const token = localStorage.getItem("token");
@@ -70,14 +72,32 @@ function Dashboard() {
       treeChoices: datas.selected,
     });
 
-    const data = await JSON.parse(await response.text());
-    console.log(data);
+    console.log("response : ", response);
+
+    if (response.success) {
+      //show notifications
+      notification.success({
+        message: "Ağaç başarıyla eklendi",
+        description: "Ağaç başarıyla eklendi",
+      });
+      navigate("/trees");
+    } else {
+      notification.error({
+        message: "Ağaç eklenemedi",
+        description: "Ağaç eklenemedi",
+      });
+    }
 
     //clear inputs and selected items
     datas.setSelected([]);
     setTreeName("");
     setTreeDescription("");
     setPhotoUrls(""); // Input'u temizle
+  };
+
+  const handleDescriptionChange = (newContent) => {
+    setTreeDescription(newContent);
+    setShowWarning(newContent.trim() === "");
   };
 
   useEffect(() => {
@@ -121,14 +141,10 @@ function Dashboard() {
               onChange={(e) => setTreeName(e.target.value)}
               value={treeName}
             />
-            <JoditEditor
-              ref={editor}
-              value={treeDescription}
-              config={config}
-              tabIndex={1}
-              onBlur={(newContent) => setTreeDescription(newContent)}
-              onChange={(newContent) => {}}
-            />
+            <p className="text-red-500 text-sm">Ağaç adı boş bırakılamaz!</p>
+
+            <JoditEditor ref={editor} value={treeDescription} config={config} tabIndex={1} onBlur={handleDescriptionChange} onChange={(newContent) => {}} />
+            <p className="text-red-500 text-sm">Açıklama boş bırakılamaz!</p>
             <input
               type="text"
               placeholder="Enlem"

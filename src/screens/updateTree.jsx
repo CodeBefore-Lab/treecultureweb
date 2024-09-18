@@ -3,8 +3,8 @@ import JoditEditor from "jodit-react";
 import Choices from "../components/choices";
 import ThemeContext from "../context";
 import { sendRequest } from "../utils/requests";
-import { Navigate, useParams } from "react-router-dom";
-import { Layout, theme } from "antd";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Layout, theme, notification } from "antd";
 
 const { Content } = Layout;
 
@@ -15,6 +15,7 @@ function UpdateTree() {
 
   const { id } = useParams();
   const datas = useContext(ThemeContext);
+  const navigate = useNavigate();
 
   const [treeName, setTreeName] = useState("");
   const [treeDescription, setTreeDescription] = useState("");
@@ -75,7 +76,19 @@ function UpdateTree() {
       treeChoices: datas.selected,
     });
     datas.setLoading(false);
-    // Handle the response as needed
+
+    if (response.success) {
+      notification.success({
+        message: "Başarılı",
+        description: "Ağaç bilgileri başarıyla güncellendi.",
+      });
+      navigate("/trees"); // Assuming you have a route for listing trees
+    } else {
+      notification.error({
+        message: "Hata",
+        description: "Ağaç güncellenirken bir hata oluştu.",
+      });
+    }
   };
 
   // Fetch choices data

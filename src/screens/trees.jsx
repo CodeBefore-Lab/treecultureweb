@@ -89,7 +89,7 @@ const Trees = () => {
             {filteredCount} result{filteredCount !== 1 ? "s" : ""} found
           </Text>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center p-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center p-2 gap-5">
           {displayedTrees.map((tree) => {
             return (
               <Card

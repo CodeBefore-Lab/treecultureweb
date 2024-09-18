@@ -24,7 +24,11 @@ const Login = () => {
     // Here you would usually send a request to your backend to authenticate the user
     // For the sake of this example, we're using a mock authentication
     // Replace with actual authentication logic
-    await login({ username, password });
+    if (username === "admin" && password === "treeculture") {
+      await login({ username, password });
+    } else {
+      alert("Invalid username or password");
+    }
   };
 
   return (
