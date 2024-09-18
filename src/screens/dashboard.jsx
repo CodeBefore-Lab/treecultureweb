@@ -20,6 +20,8 @@ function Dashboard() {
   const [treeDescription, setTreeDescription] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [photoUrls, setPhotoUrls] = useState("");
+
   //make a request for localhost:5137
   const token = localStorage.getItem("token");
 
@@ -64,7 +66,7 @@ function Dashboard() {
       latitude: latitude,
       longitude: longitude,
       qrCode: "string",
-      photoUrl: "string",
+      photoUrl: photoUrls, // Değiştirildi: virgülle ayrılmış URL'ler gönderiliyor
       treeChoices: datas.selected,
     });
 
@@ -75,6 +77,7 @@ function Dashboard() {
     datas.setSelected([]);
     setTreeName("");
     setTreeDescription("");
+    setPhotoUrls(""); // Input'u temizle
   };
 
   useEffect(() => {
@@ -139,6 +142,13 @@ function Dashboard() {
               className="p-3 w-full rounded-xl border-2 border-gray-200 shadow-lg"
               onChange={(e) => setLongitude(e.target.value)}
               value={longitude}
+            />
+            <input
+              type="text"
+              placeholder="Fotoğraf URL'leri (virgülle ayırın)"
+              className="p-3 w-full rounded-xl border-2 border-gray-200 shadow-lg"
+              onChange={(e) => setPhotoUrls(e.target.value)}
+              value={photoUrls}
             />
           </div>
           <div className="py-1">

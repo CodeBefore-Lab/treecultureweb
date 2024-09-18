@@ -84,6 +84,15 @@ const Maps = () => {
     }
   }, [trees.data]);
 
+  // Yardımcı fonksiyon: İlk resmi veya placeholder'ı döndürür
+  const getFirstImageOrPlaceholder = (photoUrl) => {
+    if (photoUrl) {
+      const urls = photoUrl.split(",");
+      return urls[0].trim(); // İlk resmi al ve boşlukları temizle
+    }
+    return "https://via.placeholder.com/100"; // Placeholder resim URL'si
+  };
+
   const MapContent = () => {
     const map = useMap();
     const canvasRef = useRef(null);
@@ -132,10 +141,14 @@ const Maps = () => {
             .setLatLng([tree.latitude, tree.longitude])
             .setContent(
               `
-              <div>
-                <h3>${tree.treeName}</h3>
-                <p>${tree.descs ? (tree.descs.length > 50 ? tree.descs.substring(0, 50) + "..." : tree.descs) : "No description"}</p>
-                <button onclick="window.navigateToTree(${tree.treeId})">Detay</button>
+              <div class="flex flex-col items-center text-center">
+                <img src="${getFirstImageOrPlaceholder(tree.photoUrl)}" alt="${tree.treeName}" class="w-24 h-24 object-cover mb-3">
+                <div>
+                  <h3 class="text-lg font-semibold">${tree.treeName}</h3>
+                  <button onclick="window.navigateToTree(${
+                    tree.treeId
+                  })" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Detay</button>
+                </div>
               </div>
             `
             )

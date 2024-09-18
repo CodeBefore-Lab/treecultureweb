@@ -7,6 +7,8 @@ import { FaTree } from "react-icons/fa";
 
 const TreeDetailId = () => {
   const [datas, setDatas] = useState();
+  const [mainImage, setMainImage] = useState("");
+  const [additionalImages, setAdditionalImages] = useState([]);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,26 +16,49 @@ const TreeDetailId = () => {
   const getTree = async () => {
     const data = await sendRequest("GET", `Trees/${id}`);
     setDatas(data);
+    if (data?.data[0]?.photoUrl) {
+      const urls = data.data[0].photoUrl.split(",").map((url) => url.trim());
+      setMainImage(urls[0]);
+      setAdditionalImages(urls.slice(1));
+    }
   };
 
   useEffect(() => {
     getTree();
   }, []);
 
+  const handleImageClick = (newMainImage) => {
+    setAdditionalImages((prevImages) => [mainImage, ...prevImages.filter((img) => img !== newMainImage)]);
+    setMainImage(newMainImage);
+  };
+
   return (
     <div className="bg-white p-4 rounded-md shadow-md m-4 flex justify-center items-center flex-col">
       {datas && datas.data.length > 0 ? (
         <>
-          <button onClick={() => navigate("/")} className=" text-dark font-bold py-2 px-4 rounded border border-black my-2">
+          <button onClick={() => navigate("/")} className="text-dark font-bold py-2 px-4 rounded border border-black my-2">
             Geri Dön
           </button>
           <Card
             key={datas?.treeId}
             className="flex flex-col justify-center items-center"
-            cover={<img alt="example" className="w-96 h-96 object-cover" src={datas?.data[0].photoUrl} />}
+            cover={<img alt={datas?.data[0].treeName} className="w-96 h-96 object-cover" src={mainImage || "https://via.placeholder.com/300"} />}
           >
+            {additionalImages.length > 0 && (
+              <div className="flex mt-2 overflow-x-auto">
+                {additionalImages.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    alt={`${datas?.data[0].treeName} - ${index + 2}`}
+                    className="w-20 h-20 object-cover mr-2 cursor-pointer"
+                    onClick={() => handleImageClick(img)}
+                  />
+                ))}
+              </div>
+            )}
             <Meta
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-2 mt-4"
               avatar={<Avatar icon={<FaTree />} />}
               title={datas?.data[0].treeName}
               description={

@@ -43,13 +43,26 @@ const Trees = () => {
     setPage(nextPage);
   };
 
+  // Yardımcı fonksiyon: İlk resmi veya placeholder'ı döndürür
+  const getFirstImageOrPlaceholder = (photoUrl) => {
+    if (photoUrl) {
+      const urls = photoUrl.split(",");
+      return urls[0].trim(); // İlk resmi al ve boşlukları temizle
+    }
+    return "https://via.placeholder.com/300"; // Placeholder resim URL'si
+  };
+
   return (
     <Layout className="bg-white h-full">
       <Content>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center p-2">
           {displayedTrees.map((tree) => {
             return (
-              <Card key={tree.treeId} style={{ width: 300 }} cover={<img alt="example" src={tree.photoUrl} />}>
+              <Card
+                key={tree.treeId}
+                style={{ width: 300 }}
+                cover={<img alt={tree.treeName} src={getFirstImageOrPlaceholder(tree.photoUrl)} style={{ height: 200, objectFit: "cover" }} />}
+              >
                 <Meta
                   avatar={<Avatar icon={<FaTree />} />}
                   title={tree.treeName}
@@ -87,7 +100,7 @@ const Trees = () => {
         </div>
         {displayedTrees.length < allTrees.length && (
           <div className="flex justify-center mt-4 mb-8">
-            <Button onClick={loadMore} type="primary">
+            <Button onClick={loadMore} type="primary" className="bg-green-500 text-white">
               Load More
             </Button>
           </div>

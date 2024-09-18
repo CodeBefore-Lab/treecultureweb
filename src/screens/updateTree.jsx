@@ -23,6 +23,7 @@ function UpdateTree() {
   const [photoUrl, setPhotoUrl] = useState("");
   const [qrCode, setQrCode] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [photoUrls, setPhotoUrls] = useState("");
 
   const editor = useRef(null);
   const config = useMemo(
@@ -49,7 +50,7 @@ function UpdateTree() {
       setTreeDescription(treeData.descs);
       setLatitude(treeData.latitude);
       setLongitude(treeData.longitude);
-      setPhotoUrl(treeData.photoUrl);
+      setPhotoUrls(treeData.photoUrl); // Değiştirildi: photoUrl'i photoUrls olarak set et
       setQrCode(treeData.qrCode);
       datas.setSelected(treeData.treeChoices);
 
@@ -70,7 +71,7 @@ function UpdateTree() {
       latitude,
       longitude,
       qrCode,
-      photoUrl,
+      photoUrl: photoUrls, // Değiştirildi: photoUrls'i gönder
       treeChoices: datas.selected,
     });
     datas.setLoading(false);
@@ -133,7 +134,15 @@ function UpdateTree() {
               onChange={(e) => setLongitude(e.target.value)}
               value={longitude}
             />
+            <input
+              type="text"
+              placeholder="Fotoğraf URL'leri (virgülle ayırın)"
+              className="p-3 w-full rounded-xl border-2 border-gray-200 shadow-lg"
+              onChange={(e) => setPhotoUrls(e.target.value)}
+              value={photoUrls}
+            />
           </div>
+
           {/* Add QR Code display */}
           <div className="flex flex-col items-center gap-2">
             <p className="text-lg font-semibold">Ağaç QR Kodu</p>
