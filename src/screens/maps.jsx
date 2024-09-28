@@ -249,6 +249,36 @@ const Maps = () => {
     return imageUrl || "https://via.placeholder.com/300";
   };
 
+  const LocationMarker = () => {
+    const [position, setPosition] = useState(null);
+    const map = useMap();
+
+    useEffect(() => {
+      map.locate().on("locationfound", function (e) {
+        setPosition(e.latlng);
+        map.flyTo(e.latlng, 18);
+      });
+    }, [map]);
+
+    const createCustomIcon = (position) => {
+      return L.divIcon({
+        className: "custom-icon",
+        html: `
+          <div class="pulse"></div>
+          <div class="center-circle"></div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+      });
+    };
+
+    return position === null ? null : (
+      <Marker position={position} icon={createCustomIcon(position)}>
+        <Popup>You are here</Popup>
+      </Marker>
+    );
+  };
+
   return (
     <Layout>
       <Content className="min-h-[280px] bg-white">
@@ -322,6 +352,7 @@ const Maps = () => {
               maxZoom={20}
             />
             <MapContent />
+            <LocationMarker />
           </MapContainer>
         ) : (
           <div className="mt-12 px-4 py-12 bg-white">
@@ -388,6 +419,46 @@ const Maps = () => {
             </a>
           </div>
         </Modal>
+        <style jsx global>{`
+          .custom-icon {
+            background: transparent;
+            border: none;
+          }
+          .center-circle {
+            width: 20px;
+            height: 20px;
+            background-color: #007aff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+          .pulse {
+            background-color: rgba(0, 122, 255, 0.2);
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+          }
+          @keyframes pulse {
+            0% {
+              transform: translate(-50%, -50%) scale(0.5);
+              opacity: 0;
+            }
+            50% {
+              opacity: 1;
+            }
+            100% {
+              transform: translate(-50%, -50%) scale(1.5);
+              opacity: 0;
+            }
+          }
+        `}</style>
       </Content>
     </Layout>
   );
