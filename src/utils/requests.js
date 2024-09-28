@@ -13,7 +13,7 @@ async function sendRequest(method, url, data = null, options = {}, token = null)
 
   const config = {
     method,
-    url: `${BASE_URL_DEV}${url}`,
+    url: `${BASE_URL}${url}`,
     ...options,
     headers: {
       Authorization: `Bearer ${tokens}`, // Add the token to the request headers
