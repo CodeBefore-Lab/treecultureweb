@@ -56,7 +56,7 @@ function UpdateTree() {
       datas.setSelected(treeData.treeChoices);
 
       // Generate QR code URL put full url https://peyzajbitkileri.uludag.edu.tr/tree/id
-      const qrData = `https://peyzajbitkileri.uludag.edu.tr/tree/${id}`;
+      const qrData = `https://peyzajbitkileri.uludag.edu.tr/trees/${id}`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
       setQrCodeUrl(qrUrl);
     }

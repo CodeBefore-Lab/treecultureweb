@@ -15,6 +15,10 @@ import Maps from "./screens/maps";
 import Contact from "./screens/contact";
 import TreeDetailId from "./screens/TreeViewById";
 import { Button } from "antd";
+import Category from "./screens/category";
+import Categories from "./screens/categories";
+import CategoryViewById from "./screens/CategoryViewById";
+import UpdateCategory from "./screens/updateCategory";
 
 const AdminLayout = () => (
   <AuthProvider>
@@ -102,12 +106,40 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/category"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Category />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Categories />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/updateCategory/:id"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <UpdateCategory />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         <Route element={<GuestLayout />}>
           <Route path="/" element={<Maps />} />
           <Route path="/trees/:id" element={<TreeDetailId />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/categorydetail/:id" element={<CategoryViewById />} />
         </Route>
       </Routes>
     </ThemeContext.Provider>

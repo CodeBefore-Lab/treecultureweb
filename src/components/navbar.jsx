@@ -38,6 +38,22 @@ const Navbar = () => {
               navigate("/trees");
             },
           },
+          {
+            key: "4",
+            icon: <RiAnchorFill />,
+            label: "Kategori Ekle",
+            onClick: () => {
+              navigate("/category");
+            },
+          },
+          {
+            key: "5",
+            icon: <RiAnchorFill />,
+            label: "Kategori Görüntüle",
+            onClick: () => {
+              navigate("/categories");
+            },
+          },
         ]}
         style={{ flex: 1, minWidth: 0 }}
       />

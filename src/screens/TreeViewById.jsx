@@ -5,7 +5,45 @@ import { Avatar, Button, Card } from "antd";
 import Meta from "antd/es/card/Meta";
 import { FaTree } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+// Yeni ikon tanımlaması
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Yeni fonksiyon ekleyelim
+const formatScientificName = (name) => {
+  const parts = name.split(" ");
+  let italicPart = [];
+  let normalPart = [];
+
+  for (let i = 0; i < parts.length; i++) {
+    if (i === 0 || (i === 1 && parts[i][0].toLowerCase() === parts[i][0])) {
+      italicPart.push(parts[i]);
+    } else {
+      normalPart.push(parts[i]);
+    }
+  }
+
+  return (
+    <>
+      <i>{italicPart.join(" ")}</i>
+      {normalPart.length > 0 && " "}
+      {normalPart.join(" ")}
+    </>
+  );
+};
 
 const TreeDetailId = () => {
   const [datas, setDatas] = useState();
@@ -55,7 +93,7 @@ const TreeDetailId = () => {
           </button>
           <Card
             key={datas?.treeId}
-            className="flex flex-col justify-center items-center"
+            className="flex flex-col justify-center items-center w-full"
             cover={<img alt={datas?.data[0].treeName} className="w-96 h-96 object-cover" src={mainImage || "https://via.placeholder.com/300"} />}
           >
             {additionalImages.length > 0 && (
@@ -86,17 +124,9 @@ const TreeDetailId = () => {
               </div>
             )}
 
-            <div className="flex flex-wrap gap-2 mt-4">
-              {datas?.data[0].treeChoices?.map((choice) => (
-                <div key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                  {choice.choiceName}
-                </div>
-              ))}
-            </div>
-
             <Meta
               className="flex flex-col gap-2 mt-4"
-              title={<h1 className="text-2xl font-bold my-5">{datas?.data[0].treeName}</h1>}
+              title={<h1 className=" my-5">{formatScientificName(datas?.data[0].treeName)}</h1>}
               description={
                 <div className="flex flex-col gap-2">
                   <div className="text-sm" dangerouslySetInnerHTML={{ __html: datas?.data[0].descs }} />

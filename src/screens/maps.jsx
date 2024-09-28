@@ -1,16 +1,19 @@
 import { Marker, Popup, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { Select, Drawer, Button, Layout, Card, Avatar, Pagination } from "antd";
+import { Select, Drawer, Button, Layout, Card, Avatar, Pagination, Modal, Input, Typography, Image } from "antd";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { sendRequest } from "../utils/requests";
 import { RiAddBoxFill, RiListOrdered } from "react-icons/ri";
+import { CloseOutlined } from "@ant-design/icons";
 import Meta from "antd/es/card/Meta";
-import { FaTree, FaMapMarkerAlt } from "react-icons/fa";
+import { FaTree, FaMapMarkerAlt, FaListAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Row, Col } from "antd";
 
 const { Content } = Layout;
+const { Search } = Input;
+const { Text } = Typography;
 
 const LeafIcon = L.Icon.extend({
   options: {
@@ -29,6 +32,12 @@ const Maps = () => {
   const [bounds, setBounds] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 100;
+  const [isAnketModalVisible, setIsAnketModalVisible] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [displayedCategories, setDisplayedCategories] = useState([]);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+  const categoryItemsPerPage = 100;
 
   const filterTreeData = (value) => {
     if (value.length === 0) {
@@ -67,6 +76,12 @@ const Maps = () => {
     console.log(data);
   };
 
+  const getCategories = async () => {
+    const data = await sendRequest("GET", "TreeCategories", null);
+    setCategories(data.data);
+    setDisplayedCategories(data.data.slice(0, categoryItemsPerPage));
+  };
+
   const blueIcon = new LeafIcon({
     iconUrl: "https://cdn-icons-png.flaticon.com/128/489/489969.png",
   });
@@ -74,6 +89,7 @@ const Maps = () => {
   useEffect(() => {
     fetchData();
     getTrees();
+    getCategories();
   }, []);
 
   useEffect(() => {
@@ -134,6 +150,9 @@ const Maps = () => {
         }).addTo(markersLayerRef.current);
 
         marker.bindPopup(() => {
+          const treeUrl = `https://peyzajbitkileri.uludag.edu.tr/Trees/${tree.treeId}`;
+          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(treeUrl)}`;
+
           const popupContent = `
             <div class="flex flex-col items-center text-center">
               <img src="${getFirstImageOrPlaceholder(tree.photoUrl)}" alt="${tree.treeName}" class="w-24 h-24 object-cover mb-3">
@@ -147,6 +166,7 @@ const Maps = () => {
                   </span>
                   <span class="text-sm text-gray-600">${tree.latitude.toFixed(6)}, ${tree.longitude.toFixed(6)}</span>
                 </div>
+                <img src="${qrCodeUrl}" alt="Tree QR Code" class="w-32 h-32 my-3 mx-auto">
                 <button onclick="window.navigateToTree(${
                   tree.treeId
                 })" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2">Detay</button>
@@ -203,10 +223,39 @@ const Maps = () => {
     return text.substr(0, maxLength) + "...";
   };
 
+  const showAnketModal = () => {
+    setIsAnketModalVisible(true);
+  };
+
+  const handleAnketModalClose = () => {
+    setIsAnketModalVisible(false);
+  };
+
+  const handleCategorySearch = (value) => {
+    setCategorySearchTerm(value);
+    const filteredCategories = categories.filter((category) => category.name.toLowerCase().includes(value.toLowerCase()));
+    setDisplayedCategories(filteredCategories.slice(0, categoryItemsPerPage));
+    setCategoryPage(1);
+  };
+
+  const handleCategoryPageChange = (page) => {
+    setCategoryPage(page);
+    const startIndex = (page - 1) * categoryItemsPerPage;
+    const endIndex = startIndex + categoryItemsPerPage;
+    setDisplayedCategories(categories.slice(startIndex, endIndex));
+  };
+
+  const getImageUrl = (imageUrl) => {
+    return imageUrl || "https://via.placeholder.com/300";
+  };
+
   return (
     <Layout>
-      <Content className="min-h-[280px]">
+      <Content className="min-h-[280px] bg-white">
         <Drawer placement={"right"} closable={false} onClose={onClose} open={open} key={"right"}>
+          <div className="flex justify-end mb-4">
+            <Button icon={<CloseOutlined />} onClick={onClose} type="text" className="text-gray-500 hover:text-gray-700" />
+          </div>
           <Button
             className="w-full mb-5 bg-green-400 text-white"
             onClick={() => {
@@ -246,8 +295,14 @@ const Maps = () => {
                 <RiListOrdered style={{ fontSize: "24px" }} onClick={() => switchTab("2")} />
               </div>
             </div>
-            <div className="bg-green-300 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around" onClick={showDrawer}>
-              <RiListOrdered style={{ fontSize: "24px" }} />
+
+            <div className="flex">
+              <div className="bg-blue-300 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around" onClick={showAnketModal}>
+                <span>Anket</span>
+              </div>
+              <div className="bg-green-300 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around ml-2" onClick={showDrawer}>
+                <RiListOrdered style={{ fontSize: "24px" }} />
+              </div>
             </div>
           </div>
         </div>
@@ -269,59 +324,70 @@ const Maps = () => {
             <MapContent />
           </MapContainer>
         ) : (
-          <div className="mt-12 px-4 py-12">
+          <div className="mt-12 px-4 py-12 bg-white">
+            <div className="mb-4">
+              <Search
+                placeholder="Search categories by name"
+                onSearch={handleCategorySearch}
+                onChange={(e) => handleCategorySearch(e.target.value)}
+                value={categorySearchTerm}
+                style={{ width: 300 }}
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {paginatedTrees.map((tree) => (
-                <div
-                  key={tree.treeId}
-                  className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
-                  onClick={() => navigate(`/Trees/${tree.treeId}`)}
+              {displayedCategories.map((category) => (
+                <Card
+                  key={category.id}
+                  hoverable
+                  style={{ width: "100%" }}
+                  onClick={() => navigate(`/categorydetail/${category.id}`)}
+                  cover={<Image alt={category.name} src={getImageUrl(category.image)} style={{ height: 200, objectFit: "cover" }} preview={false} />}
                 >
-                  <div className="h-48 overflow-hidden">
-                    <img src={getFirstImageOrPlaceholder(tree.photoUrl)} alt={tree.treeName} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-4 flex flex-col h-48">
-                    <div className="flex items-center mb-2">
-                      <Avatar icon={<FaTree />} className="mr-2" />
-                      <h3 className="text-lg font-semibold truncate">{tree.treeName}</h3>
-                    </div>
-                    <div className="h-16 overflow-hidden mb-2">
-                      {tree.descs ? (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: truncateText(tree.descs, 100),
-                          }}
-                          className="text-sm text-gray-600"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600">No description available</p>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-auto">
-                      {tree.treeChoices.slice(0, 3).map((choice) => (
-                        <span key={choice.choiceId} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                          {choice.choiceName}
-                        </span>
-                      ))}
-                      {tree.treeChoices.length > 3 && (
-                        <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded-full">+{tree.treeChoices.length - 3}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  <Meta
+                    avatar={<FaListAlt className="text-green-500" size={24} />}
+                    title={category.name}
+                    description={
+                      <div>
+                        <div className="text-sm text-gray-500">{truncateText(category.description, 100)}</div>
+                        <div className="mt-2 text-sm text-gray-500">Choices: {category.choiceIds ? category.choiceIds.length : 0}</div>
+                      </div>
+                    }
+                  />
+                </Card>
               ))}
             </div>
             <div className="mt-8 flex justify-center">
               <Pagination
-                current={currentPage}
-                total={trees.data ? trees.data.length : 0}
-                pageSize={pageSize}
-                onChange={handlePageChange}
+                current={categoryPage}
+                total={categories.length}
+                pageSize={categoryItemsPerPage}
+                onChange={handleCategoryPageChange}
                 showSizeChanger={false}
               />
             </div>
           </div>
         )}
+
+        <Modal title="Anketler" visible={isAnketModalVisible} onCancel={handleAnketModalClose} footer={null}>
+          <div className="flex flex-col space-y-4">
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSfRsgkOtt3Cm20nrkR9lhm7HMbhRv3AIZ3iEHAz5MN7hbZvdg/viewform?embedded=true'"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-blue-500 text-white py-2 px-4 rounded text-center"
+            >
+              Genel değerlendirme
+            </a>
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSf9o-Tqkx-Vk2MoCiDWPtalJkd9IKKJKFJGic5gemF4lS46Sw/viewform?embedded=true"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-green-500 text-white py-2 px-4 rounded text-center"
+            >
+              Öğrenci değerlendirmesi
+            </a>
+          </div>
+        </Modal>
       </Content>
     </Layout>
   );

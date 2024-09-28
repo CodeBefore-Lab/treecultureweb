@@ -94,7 +94,7 @@ const Trees = () => {
             return (
               <Card
                 key={tree.treeId}
-                style={{ width: 300, cursor: "pointer" }}
+                style={{ width: "100%", cursor: "pointer" }}
                 cover={<img alt={tree.treeName} src={getFirstImageOrPlaceholder(tree.photoUrl)} style={{ height: 200, objectFit: "cover" }} />}
                 onClick={() => navigate(`/updateTree/${tree.treeId}`)}
               >

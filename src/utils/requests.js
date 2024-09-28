@@ -5,6 +5,7 @@ import axios from "axios";
 // const BASE_URL = "https://api.pestomat.com/v1/treewebapi/"; // Update this with your backend URL
 // const BASE_URL = "http://160.20.111.43:3006/api/";
 const BASE_URL = "https://peyzajbitkileriapi.uludag.edu.tr/api/";
+const BASE_URL_DEV = "http://localhost:5137/api/";
 
 async function sendRequest(method, url, data = null, options = {}, token = null) {
   // Get the token from local storage without ""
@@ -12,7 +13,7 @@ async function sendRequest(method, url, data = null, options = {}, token = null)
 
   const config = {
     method,
-    url: `${BASE_URL}${url}`,
+    url: `${BASE_URL_DEV}${url}`,
     ...options,
     headers: {
       Authorization: `Bearer ${tokens}`, // Add the token to the request headers
