@@ -1,14 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Layout, Typography, Card, Spin, Button, Image } from "antd";
 import { sendRequest } from "../utils/requests";
-import { Avatar, Button, Card } from "antd";
-import Meta from "antd/es/card/Meta";
-import { FaTree } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+const { Content } = Layout;
+const { Text } = Typography;
+const { Meta } = Card;
 
 // Yeni ikon tanımlaması
 let DefaultIcon = L.icon({
@@ -45,104 +47,115 @@ const formatScientificName = (name) => {
   );
 };
 
-const TreeDetailId = () => {
-  const [datas, setDatas] = useState();
+const TreeViewById = () => {
+  const [tree, setTree] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState("");
   const [additionalImages, setAdditionalImages] = useState([]);
   const [location, setLocation] = useState(null);
-  const mapRef = useRef(null);
-
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const getTree = async () => {
-    const data = await sendRequest("GET", `Trees/${id}`);
-    setDatas(data);
-    if (data?.data[0]?.photoUrl) {
-      const urls = data.data[0].photoUrl.split(",").map((url) => url.trim());
-      setMainImage(urls[0]);
-      setAdditionalImages(urls.slice(1));
-    }
-    // Konum bilgisini ayarla
-    if (data?.data[0]?.latitude && data?.data[0]?.longitude) {
-      setLocation([parseFloat(data.data[0].latitude), parseFloat(data.data[0].longitude)]);
-    }
-  };
-
   useEffect(() => {
+    const getTree = async () => {
+      try {
+        const response = await sendRequest("GET", `Trees/${id}`);
+        if (response.success && response.data.length > 0) {
+          setTree(response.data[0]);
+          if (response.data[0].photoUrl) {
+            const urls = response.data[0].photoUrl.split(",").map((url) => url.trim());
+            setMainImage(urls[0]);
+            setAdditionalImages(urls.slice(1));
+          }
+          if (response.data[0].latitude && response.data[0].longitude) {
+            setLocation([parseFloat(response.data[0].latitude), parseFloat(response.data[0].longitude)]);
+          }
+        } else {
+          console.error("Tree not found or empty response");
+        }
+      } catch (error) {
+        console.error("Error fetching tree:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     getTree();
-  }, []);
+  }, [id]);
 
-  useEffect(() => {
-    if (location && mapRef.current) {
-      mapRef.current.setView(location, 16);
-    }
-  }, [location]);
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   const handleImageClick = (newMainImage) => {
     setAdditionalImages((prevImages) => [mainImage, ...prevImages.filter((img) => img !== newMainImage)]);
     setMainImage(newMainImage);
   };
 
+  const placeholderImage = "https://via.placeholder.com/400x200?text=No+Image";
+
+  if (loading) {
+    return (
+      <Layout className="bg-white h-full flex items-center justify-center">
+        <Spin size="large" />
+      </Layout>
+    );
+  }
+
+  if (!tree) {
+    return (
+      <Layout className="bg-white h-full flex items-center justify-center">
+        <Text>Tree not found</Text>
+      </Layout>
+    );
+  }
+
   return (
-    <div className="bg-white p-4 rounded-md shadow-md m-4 flex justify-center items-center flex-col">
-      {datas && datas.data.length > 0 ? (
-        <>
-          <button onClick={() => navigate("/")} className="text-dark font-bold py-2 px-4 rounded border border-black my-2">
-            Geri Dön
-          </button>
-          <Card
-            key={datas?.treeId}
-            className="flex flex-col justify-center items-center w-full"
-            cover={<img alt={datas?.data[0].treeName} className="w-96 h-96 object-cover" src={mainImage || "https://via.placeholder.com/300"} />}
-          >
-            {additionalImages.length > 0 && (
-              <div className="flex mt-2 overflow-x-auto">
-                {additionalImages.map((img, index) => (
-                  <img
-                    key={index}
-                    src={img}
-                    alt={`${datas?.data[0].treeName} - ${index + 2}`}
-                    className="w-20 h-20 object-cover mr-2 cursor-pointer"
-                    onClick={() => handleImageClick(img)}
-                  />
-                ))}
-              </div>
-            )}
+    <Layout className="bg-white h-full w-full">
+      <Content className="p-4 flex flex-col items-center justify-center">
+        <Button onClick={handleGoBack} className="mb-4">
+          Geri Dön
+        </Button>
+        <Card
+          className="w-full"
+          style={{ maxWidth: "100%", margin: "0 auto" }}
+          cover={<Image alt={tree.treeName} src={mainImage || placeholderImage} fallback={placeholderImage} style={{ height: 500, objectFit: "cover" }} />}
+        >
+          {additionalImages.length > 0 && (
+            <div className="flex mt-2 overflow-x-auto justify-center mb-12">
+              {additionalImages.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  alt={`${tree.treeName} - ${index + 2}`}
+                  className="w-20 h-20 object-cover mr-2 cursor-pointer"
+                  onClick={() => handleImageClick(img)}
+                />
+              ))}
+            </div>
+          )}
+          <Meta title={formatScientificName(tree.treeName)} className="text-center" />
+          <div className="flex flex-col items-center mt-4 gap-2">
+            <div className="text-gray-500" dangerouslySetInnerHTML={{ __html: tree.descs }} />
 
             {location && (
-              <div className="mt-4 w-full h-48">
-                <MapContainer center={location} zoom={18} style={{ height: "100%", width: "100%" }} ref={mapRef}>
+              <div className="mt-4 w-full h-96">
+                <MapContainer center={location} zoom={18} style={{ height: "100%", width: "100%" }}>
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   <Marker position={location}>
-                    <Popup>{datas?.data[0].treeName}</Popup>
+                    <Popup>{tree.treeName}</Popup>
                   </Marker>
                 </MapContainer>
               </div>
             )}
-
-            <Meta
-              className="flex flex-col gap-2 mt-4"
-              title={<h1 className=" my-5">{formatScientificName(datas?.data[0].treeName)}</h1>}
-              description={
-                <div className="flex flex-col gap-2">
-                  <div className="text-sm" dangerouslySetInnerHTML={{ __html: datas?.data[0].descs }} />
-                </div>
-              }
-            />
-          </Card>
-        </>
-      ) : (
-        <>
-          <h1>Ağaç Bulunamadı</h1>
-          <Button onClick={() => navigate("/trees")}>Ağaçlara Geri Dön</Button>
-        </>
-      )}
-    </div>
+          </div>
+        </Card>
+      </Content>
+    </Layout>
   );
 };
 
-export default TreeDetailId;
+export default TreeViewById;

@@ -10,6 +10,7 @@ import Meta from "antd/es/card/Meta";
 import { FaTree, FaMapMarkerAlt, FaListAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Row, Col } from "antd";
+import React from "react";
 
 const { Content } = Layout;
 const { Search } = Input;
@@ -51,6 +52,22 @@ const Maps = () => {
     setTrees({ data: filtered });
   };
 
+  const formatScientificName = (name) => {
+    const parts = name.split(" ");
+    let italicPart = [];
+    let normalPart = [];
+
+    for (let i = 0; i < parts.length; i++) {
+      if (i === 0 || (i === 1 && parts[i][0].toLowerCase() === parts[i][0])) {
+        italicPart.push(parts[i]);
+      } else {
+        normalPart.push(parts[i]);
+      }
+    }
+
+    return `<i>${italicPart.join(" ")}</i>${normalPart.length > 0 ? " " : ""}${normalPart.join(" ")}`;
+  };
+
   const navigate = useNavigate();
   const showDrawer = () => {
     setOpen(true);
@@ -78,6 +95,7 @@ const Maps = () => {
 
   const getCategories = async () => {
     const data = await sendRequest("GET", "TreeCategories", null);
+
     setCategories(data.data);
     setDisplayedCategories(data.data.slice(0, categoryItemsPerPage));
   };
@@ -157,7 +175,7 @@ const Maps = () => {
             <div class="flex flex-col items-center text-center">
               <img src="${getFirstImageOrPlaceholder(tree.photoUrl)}" alt="${tree.treeName}" class="w-24 h-24 object-cover mb-3">
               <div>
-                <h3 class="text-lg font-semibold">${tree.treeName}</h3>
+                <h3 class="text-lg font-normal">${formatScientificName(tree.treeName)}</h3>
                 <div class="flex items-center justify-center mt-2">
                   <span class="text-red-500 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -219,6 +237,7 @@ const Maps = () => {
   }, [trees.data, currentPage]);
 
   const truncateText = (text, maxLength) => {
+    if (!text) return ""; // Return empty string if text is undefined or null
     if (text.length <= maxLength) return text;
     return text.substr(0, maxLength) + "...";
   };
@@ -376,12 +395,10 @@ const Maps = () => {
                 >
                   <Meta
                     avatar={<FaListAlt className="text-green-500" size={24} />}
-                    title={category.name}
-                    description={
-                      <div>
-                        <div className="text-sm text-gray-500">{truncateText(category.description, 100)}</div>
-                        <div className="mt-2 text-sm text-gray-500">Choices: {category.choiceIds ? category.choiceIds.length : 0}</div>
-                      </div>
+                    title={
+                      <h1 className="text-lg font-normal">
+                        <span dangerouslySetInnerHTML={{ __html: formatScientificName(category.name) }} />
+                      </h1>
                     }
                   />
                 </Card>

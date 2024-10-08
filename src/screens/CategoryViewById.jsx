@@ -63,12 +63,12 @@ const CategoryViewById = () => {
           Geri Dön
         </Button>
         <Card
-          className="w-full"
+          className="w-full "
           style={{ maxWidth: "100%", margin: "0 auto" }}
-          cover={<Image alt={category.name} src={category.image || placeholderImage} fallback={placeholderImage} style={{ height: 400, objectFit: "cover" }} />}
+          cover={<Image alt={category.name} src={category.image || placeholderImage} fallback={placeholderImage} style={{ height: 500, objectFit: "cover" }} />}
         >
-          <Meta title={category.name} />
-          <div className="flex items-center mt-4 gap-2">
+          <Meta title={category.name} className="text-center" />
+          <div className="flex items-center mt-4 gap-2 justify-center">
             <div className="text-gray-500" dangerouslySetInnerHTML={{ __html: category.description }} />
           </div>
         </Card>
