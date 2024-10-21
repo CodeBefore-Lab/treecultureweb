@@ -54,6 +54,14 @@ const Navbar = () => {
               navigate("/categories");
             },
           },
+          {
+            key: "6",
+            icon: <RiAnchorFill />,
+            label: "Seçenek Ekle",
+            onClick: () => {
+              navigate("/addChoices");
+            },
+          },
         ]}
         style={{ flex: 1, minWidth: 0 }}
       />

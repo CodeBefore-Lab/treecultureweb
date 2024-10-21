@@ -121,7 +121,7 @@ const Maps = () => {
       const urls = photoUrl.split(",");
       return urls[0].trim();
     }
-    return "https://via.placeholder.com/100";
+    return "https://via.placeholder.com/300";
   };
 
   const MapContent = () => {
@@ -336,20 +336,20 @@ const Maps = () => {
               </div>
             ))}
         </Drawer>
-        <div className="bg-white p-2 w-full fixed z-10">
+        <div className="bg-blue-100 p-2 w-full fixed z-10">
           <div className="flex justify-between">
             <div className="flex items-center">
-              <div className="bg-green-400/70 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around">
+              <div className="bg-green-600/90 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around">
                 <RiAddBoxFill style={{ fontSize: "24px" }} className="hover:text-green-500" onClick={() => switchTab("1")} />
                 <RiListOrdered style={{ fontSize: "24px" }} onClick={() => switchTab("2")} />
               </div>
             </div>
 
             <div className="flex">
-              <div className="bg-blue-300 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around" onClick={showAnketModal}>
+              <div className="bg-blue-500 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around" onClick={showAnketModal}>
                 <span>Anket</span>
               </div>
-              <div className="bg-green-300 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around ml-2" onClick={showDrawer}>
+              <div className="bg-green-600/90 w-24 text-white font-bold py-2 rounded-lg flex flex-row justify-around ml-2" onClick={showDrawer}>
                 <RiListOrdered style={{ fontSize: "24px" }} />
               </div>
             </div>
@@ -374,7 +374,7 @@ const Maps = () => {
             <LocationMarker />
           </MapContainer>
         ) : (
-          <div className="mt-12 px-4 py-12 bg-white">
+          <div className="mt-12 px-4 py-12 bg-blue-100 h-screen">
             <div className="mb-4">
               <Search
                 placeholder="Search categories by name"

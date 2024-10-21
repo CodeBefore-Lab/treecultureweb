@@ -40,6 +40,28 @@ const CategoryViewById = () => {
   // Placeholder image URL
   const placeholderImage = "https://via.placeholder.com/400x200?text=No+Image";
 
+  const formatScientificName = (name) => {
+    const parts = name.split(" ");
+    let italicPart = [];
+    let normalPart = [];
+
+    for (let i = 0; i < parts.length; i++) {
+      if (i === 0 || (i === 1 && parts[i][0].toLowerCase() === parts[i][0])) {
+        italicPart.push(parts[i]);
+      } else {
+        normalPart.push(parts[i]);
+      }
+    }
+
+    return (
+      <>
+        <i>{italicPart.join(" ")}</i>
+        {normalPart.length > 0 && " "}
+        {normalPart.join(" ")}
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <Layout className="bg-white h-full flex items-center justify-center">
@@ -58,7 +80,7 @@ const CategoryViewById = () => {
 
   return (
     <Layout className="bg-white h-full w-full">
-      <Content className="p-4 flex flex-col items-center justify-center">
+      <Content className="p-4 flex flex-col font-normal items-center justify-center">
         <Button onClick={handleGoBack} className="mb-4 ">
           Geri Dön
         </Button>
@@ -67,7 +89,7 @@ const CategoryViewById = () => {
           style={{ maxWidth: "100%", margin: "0 auto" }}
           cover={<Image alt={category.name} src={category.image || placeholderImage} fallback={placeholderImage} style={{ height: 500, objectFit: "cover" }} />}
         >
-          <Meta title={category.name} className="text-center" />
+          <Meta title={formatScientificName(category.name)} className="text-center" />
           <div className="flex items-center mt-4 gap-2 justify-center">
             <div className="text-gray-500" dangerouslySetInnerHTML={{ __html: category.description }} />
           </div>

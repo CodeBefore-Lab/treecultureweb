@@ -19,6 +19,7 @@ import Category from "./screens/category";
 import Categories from "./screens/categories";
 import CategoryViewById from "./screens/CategoryViewById";
 import UpdateCategory from "./screens/updateCategory";
+import AddChoice from "./screens/addChoices";
 
 const AdminLayout = () => (
   <AuthProvider>
@@ -112,6 +113,15 @@ function App() {
               <ProtectedRoute>
                 <Navbar />
                 <Category />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addChoices"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AddChoice />
               </ProtectedRoute>
             }
           />
