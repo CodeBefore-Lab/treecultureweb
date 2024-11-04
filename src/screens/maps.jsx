@@ -41,6 +41,7 @@ const Maps = () => {
   const categoryItemsPerPage = 100;
   const [selectedFilters, setSelectedFilters] = useState({});
   const [originalTrees, setOriginalTrees] = useState(null);
+  const [allCategories, setAllCategories] = useState([]);
 
   useEffect(() => {
     const loadTrees = async () => {
@@ -123,7 +124,7 @@ const Maps = () => {
 
   const getCategories = async () => {
     const data = await sendRequest("GET", "TreeCategories", null);
-
+    setAllCategories(data.data);
     setCategories(data.data);
     setDisplayedCategories(data.data.slice(0, categoryItemsPerPage));
   };
@@ -280,7 +281,8 @@ const Maps = () => {
 
   const handleCategorySearch = (value) => {
     setCategorySearchTerm(value);
-    const filteredCategories = categories.filter((category) => category.name.toLowerCase().includes(value.toLowerCase()));
+    const filteredCategories = allCategories.filter((category) => category.name.toLowerCase().includes(value.toLowerCase()));
+    setCategories(filteredCategories);
     setDisplayedCategories(filteredCategories.slice(0, categoryItemsPerPage));
     setCategoryPage(1);
   };
