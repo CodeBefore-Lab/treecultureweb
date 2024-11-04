@@ -39,17 +39,45 @@ const Maps = () => {
   const [categoryPage, setCategoryPage] = useState(1);
   const [categorySearchTerm, setCategorySearchTerm] = useState("");
   const categoryItemsPerPage = 100;
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [originalTrees, setOriginalTrees] = useState(null);
 
-  const filterTreeData = (value) => {
+  useEffect(() => {
+    const loadTrees = async () => {
+      const data = await sendRequest("GET", "Trees", null);
+      setTrees(data);
+      setOriginalTrees(data);
+    };
+    loadTrees();
+  }, []);
+
+  const filterTreeData = (value, groupTitleId) => {
+    if (!originalTrees?.data) return;
+
+    const newFilters = { ...selectedFilters };
     if (value.length === 0) {
-      getTrees();
+      delete newFilters[groupTitleId];
+    } else {
+      newFilters[groupTitleId] = value;
+    }
+    setSelectedFilters(newFilters);
+
+    if (Object.keys(newFilters).length === 0) {
+      setTrees(originalTrees);
       return;
     }
-    const filtered = trees.data.filter((tree) => {
-      return tree.treeChoices.some((choice) => value.includes(choice.choiceId));
+
+    const filtered = originalTrees.data.filter((tree) => {
+      return Object.entries(newFilters).every(([groupId, selectedChoices]) => {
+        return tree.treeChoices.some((choice) => selectedChoices.includes(choice.choiceId));
+      });
     });
 
-    setTrees({ data: filtered });
+    console.log("Seçilen filtreler:", newFilters);
+    console.log("Filtreleme öncesi toplam ağaç sayısı:", originalTrees.data.length);
+    console.log("Filtreleme sonrası kalan ağaç sayısı:", filtered.length);
+
+    setTrees({ ...originalTrees, data: filtered });
   };
 
   const formatScientificName = (name) => {
@@ -147,11 +175,11 @@ const Maps = () => {
     }, [map]);
 
     const updateVisibleMarkers = useCallback(() => {
-      if (!map || !trees.data || !markersLayerRef.current || !canvasRef.current) return;
+      if (!map || !trees?.data || !markersLayerRef.current || !canvasRef.current) return;
 
       const bounds = map.getBounds();
       const zoom = map.getZoom();
-      const maxMarkers = Math.pow(2, zoom) * 20;
+      const maxMarkers = Math.pow(2, zoom) * 100;
 
       markersLayerRef.current.clearLayers();
 
@@ -194,7 +222,7 @@ const Maps = () => {
           return popupContent;
         });
       });
-    }, [map, trees.data]);
+    }, [map, trees?.data]);
 
     const debouncedUpdateVisibleMarkers = useCallback(() => {
       if (updateTimeoutRef.current) {
@@ -204,8 +232,8 @@ const Maps = () => {
     }, [updateVisibleMarkers]);
 
     useMapEvents({
-      moveend: debouncedUpdateVisibleMarkers,
-      zoomend: debouncedUpdateVisibleMarkers,
+      moveend: updateVisibleMarkers,
+      zoomend: updateVisibleMarkers,
     });
 
     useEffect(() => {
@@ -275,7 +303,6 @@ const Maps = () => {
     useEffect(() => {
       map.locate().on("locationfound", function (e) {
         setPosition(e.latlng);
-        map.flyTo(e.latlng, 18);
       });
     }, [map]);
 
@@ -316,18 +343,19 @@ const Maps = () => {
 
           {datas &&
             datas.data.map((data) => (
-              <div key={`group-${data.groupTitleId}`} className="flex flex-col">
+              <div key={data.mainTitleId} className="flex flex-col">
                 <h1 className="text-xl py-3 font-bold">{data.mainTitleName}</h1>
                 {data.groupTitles.map((choice) => (
                   <Select
-                    key={`select-${choice.groupTitleId}`}
+                    key={choice.groupTitleId}
                     mode="multiple"
                     className="w-full mb-5"
                     placeholder={choice.groupTitleName}
-                    onChange={(value) => filterTreeData(value)}
+                    onChange={(value) => filterTreeData(value, choice.groupTitleId)}
+                    value={selectedFilters[choice.groupTitleId] || []}
                   >
                     {choice.choices.map((item) => (
-                      <Select.Option key={`option-${item.choiceId}`} value={item.choiceId}>
+                      <Select.Option key={item.choiceId} value={item.choiceId}>
                         {item.choiceName}
                       </Select.Option>
                     ))}
@@ -416,7 +444,7 @@ const Maps = () => {
           </div>
         )}
 
-        <Modal title="Anketler" visible={isAnketModalVisible} onCancel={handleAnketModalClose} footer={null}>
+        <Modal title="Anketler" open={isAnketModalVisible} onCancel={handleAnketModalClose} footer={null}>
           <div className="flex flex-col space-y-4">
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSfRsgkOtt3Cm20nrkR9lhm7HMbhRv3AIZ3iEHAz5MN7hbZvdg/viewform?embedded=true'"
