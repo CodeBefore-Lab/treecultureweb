@@ -65,20 +65,33 @@ const Maps = () => {
 
     if (Object.keys(newFilters).length === 0) {
       setTrees(originalTrees);
+      setCategories(allCategories);
+      setDisplayedCategories(allCategories.slice(0, categoryItemsPerPage));
+      setCategoryPage(1);
       return;
     }
 
-    const filtered = originalTrees.data.filter((tree) => {
+    const filteredTrees = originalTrees.data.filter((tree) => {
       return Object.entries(newFilters).every(([groupId, selectedChoices]) => {
         return tree.treeChoices.some((choice) => selectedChoices.includes(choice.choiceId));
       });
     });
 
-    console.log("Seçilen filtreler:", newFilters);
-    console.log("Filtreleme öncesi toplam ağaç sayısı:", originalTrees.data.length);
-    console.log("Filtreleme sonrası kalan ağaç sayısı:", filtered.length);
+    const filteredCategories = allCategories.filter((category) => {
+      return Object.entries(newFilters).every(([groupId, selectedChoices]) => {
+        return category.choices.some((choice) => selectedChoices.includes(choice.choiceId));
+      });
+    });
 
-    setTrees({ ...originalTrees, data: filtered });
+    console.log("Selected filters:", newFilters);
+    console.log("Trees before filtering:", originalTrees.data.length);
+    console.log("Trees after filtering:", filteredTrees.length);
+    console.log("Categories after filtering:", filteredCategories.length);
+
+    setTrees({ ...originalTrees, data: filteredTrees });
+    setCategories(filteredCategories);
+    setDisplayedCategories(filteredCategories.slice(0, categoryItemsPerPage));
+    setCategoryPage(1);
   };
 
   const formatScientificName = (name) => {
